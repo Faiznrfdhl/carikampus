@@ -1,5 +1,6 @@
-# Import all SQLAlchemy models here for Alembic detection and metadata reflection
-# Example: from app.models.user import User
 from app.db.base import Base
+from app.models.campus import Campus
+from app.models.faculty import Faculty
+from app.models.major import Major
 
-__all__ = ["Base"]
+__all__ = ["Base", "Campus", "Faculty", "Major"]
