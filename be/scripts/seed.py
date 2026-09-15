@@ -6,13 +6,18 @@ BASE_DIR = Path(__file__).resolve().parents[1]
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
+if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
+from typing import Any, Dict, List
+
 from app.db.session import SessionLocal
 from app.models.campus import Campus
 from app.models.faculty import Faculty
 from app.models.major import Major
 
 
-CAMPUSES_DATA = [
+CAMPUSES_DATA: list[dict[str, Any]] = [
     {
         "name": "Universitas Indonesia",
         "short_name": "UI",
@@ -464,17 +469,22 @@ def seed_database():
                 print(f"⏩ Kampus '{campus_data['name']}' sudah ada. Melewati...")
                 continue
 
-            faculties_data = campus_data.pop("faculties", [])
+            faculties_data: list[dict[str, Any]] = campus_data.get("faculties", [])
+            campus_fields = {k: v for k, v in campus_data.items() if k != "faculties"}
 
             # Create campus
-            campus = Campus(**campus_data)
+            campus = Campus(**campus_fields)
             db.add(campus)
             db.flush()
             campuses_created += 1
 
             for fac_data in faculties_data:
-                majors_data = fac_data.pop("majors", [])
-                faculty = Faculty(**fac_data, campus_id=campus.id)
+                majors_data: list[dict[str, Any]] = fac_data.get("majors", [])
+                faculty = Faculty(
+                    name=str(fac_data["name"]),
+                    slug=str(fac_data["slug"]),
+                    campus_id=campus.id,
+                )
                 db.add(faculty)
                 db.flush()
                 faculties_created += 1
